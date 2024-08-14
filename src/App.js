@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import './App.css';
+import "./App.css"
 
 const App = () => {
   const [board, setBoard] = useState(Array(9).fill(null));
@@ -48,7 +48,7 @@ const App = () => {
   };
 
   return (
-    <div className="game">
+    <div className="font-black">
       <h1>Tic Tac Toe</h1>
       <Board squares={board} onClick={handleClick} />
       <p>{winner ? `Result: ${winner}` : `Next player: ${isXNext ? 'X' : 'O'}`}</p>
@@ -58,7 +58,7 @@ const App = () => {
 };
 
 const Board = ({ squares, onClick }) => (
-  <div className="board">
+  <div className="row-cols-4 p-5">
     {squares.map((square, index) => (
       <Square key={index} value={square} onClick={() => onClick(index)} />
     ))}
@@ -66,7 +66,7 @@ const Board = ({ squares, onClick }) => (
 );
 
 const Square = ({ value, onClick }) => (
-  <button className="square" onClick={onClick}>
+  <button className="btn bg-secondary-subtle btn-lg p-5 m-2" onClick={onClick}>
     {value}
   </button>
 );
