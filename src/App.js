@@ -119,7 +119,7 @@ const ModeSelection = ({ onSelectMode }) => {
       />
       <input
         type="text"
-        placeholder="Player O Name"
+        placeholder="Player o Name"
         value={playerOName}
         onChange={(e) => setPlayerOName(e.target.value)}
         className="mb-2 p-2 rounded text-black sm:w-96 w-64"
