@@ -83,8 +83,19 @@ const App = () => {
           <ScoreBoard playerX={playerX} playerO={playerO} score={score} />
           <Board squares={board} onClick={handleClick} />
           <p>{winner ? `Result: ${winner}` : `Current Player: ${isXNext ? playerX : playerO}`}</p>
-          <button className='bg-blue-700 w-96 rounded p-5 m-5' onClick={resetGame}>Restart Game</button>
-          <button className='bg-red-500 w-96 rounded p-5 m-5' onClick={resetMode}>Change Game Mode</button>
+          <div className='m-5'>
+
+          <button className='bg-blue-700 relative inline-flex items-center justify-center p-0.5 mb-2 me-2 overflow-hidden text-sm font-medium text-gray-900 rounded-lg group bg-gradient-to-br hover:text-white dark:text-white focus:ring-4 focus:outline-none w-52 m-5' onClick={resetGame}>
+          <span class="relative px-5 py-2.5 transition-all ease-in duration-75 bg-white dark:bg-gray-900 rounded-md group-hover:bg-opacity-0 w-52 text-2xl">
+Reset Game
+</span>
+          </button>
+          <button class="relative inline-flex items-center justify-center p-0.5 mb-2 me-2 overflow-hidden text-sm font-medium text-gray-900 rounded-lg group bg-gradient-to-br bg-red-700 hover:text-white dark:text-white focus:ring-4 focus:outline-none w-72 m-5" onClick={resetMode}>
+<span class="relative px-5 py-2.5 transition-all ease-in duration-75 bg-white dark:bg-gray-900 rounded-md group-hover:bg-opacity-0 w-72 text-2xl">
+Change game mode
+</span>
+</button>
+          </div>
         </>
       )}
     </div>
@@ -104,18 +115,25 @@ const ModeSelection = ({ onSelectMode }) => {
         placeholder="Player X Name"
         value={playerXName}
         onChange={(e) => setPlayerXName(e.target.value)}
-        className="mb-2 p-2 rounded text-black"
+        className="mb-2 p-2 rounded text-black sm:w-96 w-64"
       />
       <input
         type="text"
         placeholder="Player O Name"
         value={playerOName}
         onChange={(e) => setPlayerOName(e.target.value)}
-        className="mb-2 p-2 rounded text-black"
+        className="mb-2 p-2 rounded text-black sm:w-96 w-64"
       />
+
       <div>
-        <button className='bg-blue-500 w-60 rounded p-3 m-2' onClick={() => onSelectMode('single', playerXName, 'Computer')}>Single Player</button>
-        <button className='bg-green-500 w-60 rounded p-3 m-2' onClick={() => onSelectMode('multi', playerXName, playerOName)}>Multiplayer</button>
+        <button className='relative inline-flex items-center justify-center p-0.5 mb-2 me-2 overflow-hidden text-sm font-medium text-gray-900 rounded-lg group bg-gradient-to-br bg-blue-600 hover:text-white dark:text-white focus:ring-4 focus:outline-none w-52 m-5' onClick={() => onSelectMode('single', playerXName, 'Computer')}>
+        <span class="relative px-5 py-2.5 transition-all ease-in duration-75 bg-white dark:bg-gray-900 rounded-md group-hover:bg-opacity-0 w-52 text-2xl">
+Single player
+</span></button>
+        <button className='relative inline-flex items-center justify-center p-0.5 mb-2 me-2 overflow-hidden text-sm font-medium text-gray-900 rounded-lg group bg-gradient-to-br bg-green-600 hover:text-white dark:text-white focus:ring-4 focus:outline-none w-52 m-5' onClick={() => onSelectMode('multi', playerXName, playerOName)}>        
+          <span class="relative px-5 py-2.5 transition-all ease-in duration-75 bg-white dark:bg-gray-900 rounded-md group-hover:bg-opacity-0 w-52 text-2xl">
+Multiplayer
+</span></button>
       </div>
       </div>
   );
