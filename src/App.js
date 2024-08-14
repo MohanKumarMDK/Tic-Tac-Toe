@@ -78,10 +78,10 @@ const App = () => {
         <ModeSelection onSelectMode={handleModeSelection} />
       ) : (
         <>
-          <h1>Tic Tac Toe</h1>
+          <h1 className='font-black text-5xl my-5'>Tic Tac Toe</h1>
           <ScoreBoard playerX={playerX} playerO={playerO} score={score} />
           <Board squares={board} onClick={handleClick} />
-          <p>{winner ? `Result: ${winner}` : `Next player: ${isXNext ? playerX : playerO}`}</p>
+          <p>{winner ? `Result: ${winner}` : `Current Player: ${isXNext ? playerX : playerO}`}</p>
           <button className='bg-blue-700 w-96 rounded p-5 m-5' onClick={resetGame}>Restart Game</button>
           <button className='bg-red-500 w-96 rounded p-5 m-5' onClick={resetMode}>Change Game Mode</button>
         </>
@@ -91,8 +91,8 @@ const App = () => {
 };
 
 const ModeSelection = ({ onSelectMode }) => {
-  const [playerXName, setPlayerXName] = useState('');
-  const [playerOName, setPlayerOName] = useState('');
+  const [playerXName, setPlayerXName] = useState('Player 1');
+  const [playerOName, setPlayerOName] = useState('Player 2');
 
   return (
     <div className="flex flex-col items-center">
