@@ -14,12 +14,13 @@ const App = () => {
     const currentWinner = calculateWinner(board);
     if (currentWinner) {
       setWinner(currentWinner);
+      setTimeout(resetGame, 500); // Automatically restart the game after 2 seconds
       alert(`Winner: ${currentWinner}`);
       setScore(prevScore => ({
         ...prevScore,
         [currentWinner]: prevScore[currentWinner] + 1
       }));
-      setTimeout(resetGame, 2000); // Automatically restart the game after 2 seconds
+      
     } else if (board.every(square => square !== null)) {
       setWinner('Tie');
       alert('The game is a tie!');
@@ -96,6 +97,7 @@ const ModeSelection = ({ onSelectMode }) => {
 
   return (
     <div className="flex flex-col items-center">
+      <h1 className='font-black text-5xl my-5'>Tic Tac Toe</h1>
       <h2 className='m-5'>Select Game Mode</h2>
       <input
         type="text"
