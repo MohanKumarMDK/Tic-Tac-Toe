@@ -5,12 +5,20 @@ const App = () => {
   const [board, setBoard] = useState(Array(9).fill(null));
   const [isXNext, setIsXNext] = useState(true);
   const [winner, setWinner] = useState(null);
+  const [mode, setMode] = useState(null);
+  const [playerX, setPlayerX] = useState('');
+  const [playerO, setPlayerO] = useState('');
+  const [score, setScore] = useState({ X: 0, O: 0 });
 
   useEffect(() => {
     const currentWinner = calculateWinner(board);
     if (currentWinner) {
       setWinner(currentWinner);
       alert(`Winner: ${currentWinner}`);
+      setScore(prevScore => ({
+        ...prevScore,
+        [currentWinner]: prevScore[currentWinner] + 1
+      }));
       setTimeout(resetGame, 2000); // Automatically restart the game after 2 seconds
     } else if (board.every(square => square !== null)) {
       setWinner('Tie');
@@ -26,7 +34,7 @@ const App = () => {
     setBoard(newBoard);
     setIsXNext(!isXNext);
 
-    if (isXNext) {
+    if (isXNext && mode === 'single') {
       setTimeout(() => {
         computerMove(newBoard);
       }, 500);
@@ -49,15 +57,80 @@ const App = () => {
     setWinner(null);
   };
 
+  const handleModeSelection = (selectedMode, playerXName, playerOName) => {
+    setMode(selectedMode);
+    setPlayerX(playerXName);
+    setPlayerO(playerOName);
+    resetGame();
+  };
+
+  const resetMode = () => {
+    setMode(null);
+    setPlayerX('');
+    setPlayerO('');
+    setScore({ X: 0, O: 0 });
+    resetGame();
+  };
+
   return (
-    <div className="flex flex-col justify-center align-middle m-5 p-5 text-4xl text-center text-white">
-      <h1>Tic Tac Toe</h1>
-      <Board squares={board} onClick={handleClick} />
-      <p>{winner ? `Result: ${winner}` : `Next player: ${isXNext ? 'X' : 'O'}`}</p>
-      <button onClick={resetGame}>Restart Game</button>
+    <div className="flex flex-col justify-center items-center m-5 p-5 text-4xl text-center text-white">
+      {!mode ? (
+        <ModeSelection onSelectMode={handleModeSelection} />
+      ) : (
+        <>
+          <h1>Tic Tac Toe</h1>
+          <ScoreBoard playerX={playerX} playerO={playerO} score={score} />
+          <Board squares={board} onClick={handleClick} />
+          <p>{winner ? `Result: ${winner}` : `Next player: ${isXNext ? playerX : playerO}`}</p>
+          <button className='bg-blue-700 w-96 rounded p-5 m-5' onClick={resetGame}>Restart Game</button>
+          <button className='bg-red-500 w-96 rounded p-5 m-5' onClick={resetMode}>Change Game Mode</button>
+        </>
+      )}
     </div>
   );
 };
+
+const ModeSelection = ({ onSelectMode }) => {
+  const [playerXName, setPlayerXName] = useState('');
+  const [playerOName, setPlayerOName] = useState('');
+
+  return (
+    <div className="flex flex-col items-center">
+      <h2 className='m-5'>Select Game Mode</h2>
+      <input
+        type="text"
+        placeholder="Player X Name"
+        value={playerXName}
+        onChange={(e) => setPlayerXName(e.target.value)}
+        className="mb-2 p-2 rounded text-black"
+      />
+      <input
+        type="text"
+        placeholder="Player O Name"
+        value={playerOName}
+        onChange={(e) => setPlayerOName(e.target.value)}
+        className="mb-2 p-2 rounded text-black"
+      />
+      <div>
+        <button className='bg-blue-500 w-60 rounded p-3 m-2' onClick={() => onSelectMode('single', playerXName, 'Computer')}>Single Player</button>
+        <button className='bg-green-500 w-60 rounded p-3 m-2' onClick={() => onSelectMode('multi', playerXName, playerOName)}>Multiplayer</button>
+      </div>
+      </div>
+  );
+};
+
+const ScoreBoard = ({ playerX, playerO, score }) => (
+  <div className="flex justify-between w-full mb-5">
+    <div className="flex flex-col items-center">
+      <h3>{playerX}</h3>
+      <p>Score: {score.X}</p>
+    </div>
+    <div className="flex flex-col items-center">
+      <h3>{playerO}</h3>
+      <p>Score: {score.O}</p>
+    </div>
+  </div>
+);
 
 const Board = ({ squares, onClick }) => (
   <div className="grid grid-rows-3 grid-flow-col p-5 align-middle justify-center">
