@@ -184,7 +184,7 @@ const ModeSelection = ({ onSelectMode }) => {
 };
 
 const ScoreBoard = ({ playerX, playerO, score }) => (
-  <div className="flex justify-between w-full mb-5">
+  <div className="flex justify-between w-full mb-5 text-lg sm:text-5xl">
     <div className="flex flex-col items-center">
       <h3>{playerX}</h3>
       <p>Score: {score.X}</p>
@@ -197,7 +197,7 @@ const ScoreBoard = ({ playerX, playerO, score }) => (
 );
 
 const Board = ({ squares, onClick }) => (
-  <div className="grid grid-rows-3 grid-flow-col p-5 align-middle justify-center">
+  <div className="grid grid-rows-3 grid-flow-col p-5 items-center justify-center">
     {squares.map((square, index) => (
       <Square key={index} value={square} onClick={() => onClick(index)} />
     ))}
@@ -205,7 +205,7 @@ const Board = ({ squares, onClick }) => (
 );
 
 const Square = ({ value, onClick }) => (
-  <button type='button' className="text-white font-extrabold text-5xl bg-blue-300 hover:shadow-[0_0_15px_5px_rgba(100,116,256,1)] focus:ring-4 focus:ring-blue-300 rounded-lg px-5 py-2.5 me-2 mb-2 focus:outline-none w-28 h-28" onClick={onClick}>
+  <button type='button' className="text-white font-extrabold text-5xl bg-blue-300 hover:shadow-[0_0_15px_5px_rgba(100,116,256,1)] focus:ring-4 focus:ring-blue-300 rounded-lg px-5 py-2.5 m-1 xs:me-2 mb-2 focus:outline-none w-28 h-28" onClick={onClick}>
     {value}
   </button>
 );
