@@ -1,5 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import "./App.css"
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import "./App.css";
+import Confetti from 'react-confetti';
+import useSound from 'use-sound';
+import winnerSound from './win.mp3'; 
+import loserSound from './loose.wav';  
 
 const App = () => {
   const [board, setBoard] = useState(Array(9).fill(null));
@@ -9,47 +13,56 @@ const App = () => {
   const [playerX, setPlayerX] = useState('');
   const [playerO, setPlayerO] = useState('');
   const [score, setScore] = useState({ X: 0, O: 0 });
+  const [playWinnerSound] = useSound(winnerSound);
+  const [playLoserSound] = useSound(loserSound);
+
+  const currentWinner = useMemo(() => calculateWinner(board), [board]);
 
   useEffect(() => {
-    const currentWinner = calculateWinner(board);
     if (currentWinner) {
       setWinner(currentWinner);
-      setTimeout(resetGame, 500); // Automatically restart the game after 2 seconds
-      alert(`Winner: ${currentWinner}`);
       setScore(prevScore => ({
         ...prevScore,
         [currentWinner]: prevScore[currentWinner] + 1
       }));
-      
+
+      if (currentWinner === 'X' || (currentWinner === 'O' && mode === 'multi')) {
+        playWinnerSound();
+      }
+
+      setTimeout(() => resetGame(), 2000);
     } else if (board.every(square => square !== null)) {
       setWinner('Tie');
       alert('The game is a tie!');
-      setTimeout(resetGame, 2000); // Automatically restart the game after 2 seconds
+      setTimeout(resetGame, 2000);
+    }
+  }, [currentWinner, board, mode, playWinnerSound]);
+
+  const computerMove = useCallback(() => {
+    const emptyIndices = board.map((val, idx) => val === null ? idx : null).filter(val => val !== null);
+    const randomIndex = emptyIndices[Math.floor(Math.random() * emptyIndices.length)];
+    if (randomIndex !== undefined) {
+      const newBoard = board.slice();
+      newBoard[randomIndex] = 'O';
+      setBoard(newBoard);
+      setIsXNext(true);
     }
   }, [board]);
 
+  useEffect(() => {
+    if (!isXNext && mode === 'single' && !winner) {
+      setTimeout(() => {
+        computerMove();
+      }, 500);
+    }
+  }, [isXNext, winner, mode, computerMove]);
+
   const handleClick = (index) => {
+    if (winner || board[index]) return;
     const newBoard = board.slice();
-    if (winner || newBoard[index]) return;
     newBoard[index] = isXNext ? 'X' : 'O';
     setBoard(newBoard);
     setIsXNext(!isXNext);
-
-    if (isXNext && mode === 'single') {
-      setTimeout(() => {
-        computerMove(newBoard);
-      }, 500);
-    }
-  };
-
-  const computerMove = (currentBoard) => {
-    const emptyIndices = currentBoard.map((val, idx) => val === null ? idx : null).filter(val => val !== null);
-    const randomIndex = emptyIndices[Math.floor(Math.random() * emptyIndices.length)];
-    if (randomIndex !== undefined) {
-      currentBoard[randomIndex] = 'O';
-      setBoard([...currentBoard]);
-      setIsXNext(true);
-    }
   };
 
   const resetGame = () => {
@@ -75,6 +88,7 @@ const App = () => {
 
   return (
     <div className="flex flex-col justify-center items-center m-5 p-5 text-4xl text-center text-white">
+      {winner && winner !== 'Tie' && <Confetti />}
       {!mode ? (
         <ModeSelection onSelectMode={handleModeSelection} />
       ) : (
@@ -84,18 +98,20 @@ const App = () => {
           <Board squares={board} onClick={handleClick} />
           <p>{winner ? `Result: ${winner}` : `Current Player: ${isXNext ? playerX : playerO}`}</p>
           <div className='m-5'>
-
-          <button className='bg-blue-700 relative inline-flex items-center justify-center p-0.5 mb-2 me-2 overflow-hidden text-sm font-medium text-gray-900 rounded-lg group bg-gradient-to-br hover:text-white dark:text-white focus:ring-4 focus:outline-none w-52 m-5' onClick={resetGame}>
-          <span class="relative px-5 py-2.5 transition-all ease-in duration-75 bg-white dark:bg-gray-900 rounded-md group-hover:bg-opacity-0 w-52 text-2xl">
-Reset Game
-</span>
-          </button>
-          <button class="relative inline-flex items-center justify-center p-0.5 mb-2 me-2 overflow-hidden text-sm font-medium text-gray-900 rounded-lg group bg-gradient-to-br bg-red-700 hover:text-white dark:text-white focus:ring-4 focus:outline-none w-72 m-5" onClick={resetMode}>
-<span class="relative px-5 py-2.5 transition-all ease-in duration-75 bg-white dark:bg-gray-900 rounded-md group-hover:bg-opacity-0 w-72 text-2xl">
-Change game mode
-</span>
-</button>
+            <button className='bg-blue-700 relative inline-flex items-center justify-center p-0.5 mb-2 me-2 overflow-hidden text-sm font-medium text-gray-900 rounded-lg group bg-gradient-to-br hover:text-white dark:text-white focus:ring-4 focus:outline-none w-52 m-5' onClick={resetGame}>
+              <span className="relative px-5 py-2.5 transition-all ease-in duration-75 bg-white dark:bg-gray-900 rounded-md group-hover:bg-opacity-0 w-52 text-2xl">Reset Game</span>
+            </button>
+            <button className="relative inline-flex items-center justify-center p-0.5 mb-2 me-2 overflow-hidden text-sm font-medium text-gray-900 rounded-lg group bg-gradient-to-br bg-red-700 hover:text-white dark:text-white focus:ring-4 focus:outline-none w-72 m-5" onClick={resetMode}>
+              <span className="relative px-5 py-2.5 transition-all ease-in duration-75 bg-white dark:bg-gray-900 rounded-md group-hover:bg-opacity-0 w-72 text-2xl">Change game mode</span>
+            </button>
           </div>
+          {mode === 'single' && winner === 'O' && (
+            <div className="flex flex-col items-center">
+              <span role="img" aria-label="thumbs down" className="text-6xl">👎</span>
+              <p>You lost!</p>
+              {playLoserSound()}
+            </div>
+          )}
         </>
       )}
     </div>
@@ -127,15 +143,13 @@ const ModeSelection = ({ onSelectMode }) => {
 
       <div>
         <button className='relative inline-flex items-center justify-center p-0.5 mb-2 me-2 overflow-hidden text-sm font-medium text-gray-900 rounded-lg group bg-gradient-to-br bg-blue-600 hover:text-white dark:text-white focus:ring-4 focus:outline-none w-52 m-5' onClick={() => onSelectMode('single', playerXName, 'Computer')}>
-        <span class="relative px-5 py-2.5 transition-all ease-in duration-75 bg-white dark:bg-gray-900 rounded-md group-hover:bg-opacity-0 w-52 text-2xl">
-Single player
-</span></button>
-        <button className='relative inline-flex items-center justify-center p-0.5 mb-2 me-2 overflow-hidden text-sm font-medium text-gray-900 rounded-lg group bg-gradient-to-br bg-green-600 hover:text-white dark:text-white focus:ring-4 focus:outline-none w-52 m-5' onClick={() => onSelectMode('multi', playerXName, playerOName)}>        
-          <span class="relative px-5 py-2.5 transition-all ease-in duration-75 bg-white dark:bg-gray-900 rounded-md group-hover:bg-opacity-0 w-52 text-2xl">
-Multiplayer
-</span></button>
+          <span className="relative px-5 py-2.5 transition-all ease-in duration-75 bg-white dark:bg-gray-900 rounded-md group-hover:bg-opacity-0 w-52 text-2xl">Single player</span>
+        </button>
+        <button className='relative inline-flex items-center justify-center p-0.5 mb-2 me-2 overflow-hidden text-sm font-medium text-gray-900 rounded-lg group bg-gradient-to-br bg-green-600 hover:text-white dark:text-white focus:ring-4 focus:outline-none w-52 m-5' onClick={() => onSelectMode('multi', playerXName, playerOName)}>
+          <span className="relative px-5 py-2.5 transition-all ease-in duration-75 bg-white dark:bg-gray-900 rounded-md group-hover:bg-opacity-0 w-52 text-2xl">Multiplayer</span>
+        </button>
       </div>
-      </div>
+    </div>
   );
 };
 
@@ -161,7 +175,7 @@ const Board = ({ squares, onClick }) => (
 );
 
 const Square = ({ value, onClick }) => (
-  <button type='button' className="text-white font-extrabold text-5xl bg-blue-300 hover:shadow-[0_0_15px_5px_rgba(100,116,256,1)] focus:ring-4 focus:ring-blue-300 rounded-lg px-5 py-2.5 me-2 mb-2 focus:outline-none w-28 h-28 " onClick={onClick}>
+  <button type='button' className="text-white font-extrabold text-5xl bg-blue-300 hover:shadow-[0_0_15px_5px_rgba(100,116,256,1)] focus:ring-4 focus:ring-blue-300 rounded-lg px-5 py-2.5 me-2 mb-2 focus:outline-none w-28 h-28" onClick={onClick}>
     {value}
   </button>
 );
