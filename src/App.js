@@ -38,7 +38,7 @@ const App = () => {
       }
     } else if (board.every(square => square !== null) && !winner) {
       setWinner('Tie');
-      alert('The game is a tie!');
+      alert('The game is a Tie!');
       setTimeout(() => {
         resetGame();
       }, 2000);
