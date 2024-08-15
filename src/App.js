@@ -20,23 +20,30 @@ const App = () => {
 
   useEffect(() => {
     if (currentWinner) {
-      setWinner(currentWinner);
-      setScore(prevScore => ({
-        ...prevScore,
-        [currentWinner]: prevScore[currentWinner] + 1
-      }));
+      if (!winner) {
+        setWinner(currentWinner);
+        setScore(prevScore => ({
+          ...prevScore,
+          [currentWinner]: prevScore[currentWinner] + 1
+        }));
 
-      if (currentWinner === 'X' || (currentWinner === 'O' && mode === 'multi')) {
-        playWinnerSound();
+        if (currentWinner === 'X' || (currentWinner === 'O' && mode === 'multi')) {
+          playWinnerSound();
+        }
+
+        // Reset the game after a delay
+        setTimeout(() => {
+          resetGame();
+        }, 2000);
       }
-
-      setTimeout(() => resetGame(), 2000);
-    } else if (board.every(square => square !== null)) {
+    } else if (board.every(square => square !== null) && !winner) {
       setWinner('Tie');
       alert('The game is a tie!');
-      setTimeout(resetGame, 2000);
+      setTimeout(() => {
+        resetGame();
+      }, 2000);
     }
-  }, [currentWinner, board, mode, playWinnerSound]);
+  }, [currentWinner, board, winner, mode, playWinnerSound]);
 
   const computerMove = useCallback(() => {
     const emptyIndices = board.map((val, idx) => val === null ? idx : null).filter(val => val !== null);
@@ -68,7 +75,7 @@ const App = () => {
   const resetGame = () => {
     setBoard(Array(9).fill(null));
     setIsXNext(true);
-    setWinner(null);
+    setWinner(null); // Directly reset winner here
   };
 
   const handleModeSelection = (selectedMode, playerXName, playerOName) => {
