@@ -4,6 +4,8 @@ import Confetti from 'react-confetti';
 import useSound from 'use-sound';
 import winnerSound from './win.mp3'; 
 import loserSound from './loose.wav';  
+import backgroundMusic from './background.mp3'; // Import background music
+import buttonClickSound from './click.mp3'; // Import button click sound
 
 const App = () => {
   const [board, setBoard] = useState(Array(9).fill(null));
@@ -13,8 +15,19 @@ const App = () => {
   const [playerX, setPlayerX] = useState('');
   const [playerO, setPlayerO] = useState('');
   const [score, setScore] = useState({ X: 0, O: 0 });
-  const [playWinnerSound] = useSound(winnerSound);
-  const [playLoserSound] = useSound(loserSound);
+  const [soundOn, setSoundOn] = useState(true); // State for sound control
+  const [playWinnerSound] = useSound(winnerSound, { volume: 0.5, soundEnabled: soundOn });
+  const [playLoserSound] = useSound(loserSound, { volume: 1, soundEnabled: soundOn });
+  const [playBackgroundMusic, { stop: stopBackgroundMusic }] = useSound(backgroundMusic, { loop: true, volume: 0.3, soundEnabled: soundOn });
+  const [playButtonClickSound] = useSound(buttonClickSound, { volume: 1, soundEnabled: soundOn });
+
+  useEffect(() => {
+    if (soundOn) {
+      playBackgroundMusic(); // Start background music
+    } else {
+      stopBackgroundMusic(); // Stop background music
+    }
+  }, [soundOn, playBackgroundMusic, stopBackgroundMusic]);
 
   const currentWinner = useMemo(() => calculateWinner(board), [board]);
 
@@ -31,7 +44,6 @@ const App = () => {
           playWinnerSound();
         }
 
-        // Reset the game after a delay
         setTimeout(() => {
           resetGame();
         }, 2000);
@@ -70,6 +82,9 @@ const App = () => {
     newBoard[index] = isXNext ? 'X' : 'O';
     setBoard(newBoard);
     setIsXNext(!isXNext);
+    if (soundOn) {
+      playButtonClickSound(); // Play button click sound
+    }
   };
 
   const resetGame = () => {
@@ -93,6 +108,10 @@ const App = () => {
     resetGame();
   };
 
+  const toggleSound = () => {
+    setSoundOn(prev => !prev);
+  };
+
   return (
     <div className="flex flex-col justify-center items-center m-5 p-5 text-4xl text-center text-white">
       {winner && winner !== 'Tie' && <Confetti />}
@@ -110,6 +129,10 @@ const App = () => {
             </button>
             <button className="relative inline-flex items-center justify-center p-0.5 mb-2 me-2 overflow-hidden text-sm font-medium text-gray-900 rounded-lg group bg-gradient-to-br bg-red-700 hover:text-white dark:text-white focus:ring-4 focus:outline-none w-72 m-5" onClick={resetMode}>
               <span className="relative px-5 py-2.5 transition-all ease-in duration-75 bg-white dark:bg-gray-900 rounded-md group-hover:bg-opacity-0 w-72 text-2xl">Change game mode</span>
+            </button>
+            <br></br>
+            <button className="relative inline-flex items-center justify-center p-0.5 mb-2 me-2 overflow-hidden text-sm font-medium text-gray-900 rounded-lg group bg-gradient-to-br bg-gray-600 hover:text-white dark:text-white focus:ring-4 focus:outline-none w-72 m-5" onClick={toggleSound}>
+              <span className="relative px-5 py-2.5 transition-all ease-in duration-75 bg-white dark:bg-gray-900 rounded-md group-hover:bg-opacity-0 w-72 text-2xl">{soundOn ? 'Turn off sounds' : 'Turn on sounds'}</span>
             </button>
           </div>
           {mode === 'single' && winner === 'O' && (
